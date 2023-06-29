@@ -1,0 +1,29 @@
+<view class="page-bg"></view>
+
+<view class="inputPage">
+  <!-- 选择去重等级 -->
+  <view class="menu">
+    <van-cell title="去重等级" is-link value="{{levelPicker[level]}}" bind:click="showLevelSelection"/>
+    <van-popup show="{{ showLevelSelection }}" position="bottom" custom-style="height: 30%;" round bind:close="closeLevelSelection">
+      <van-picker show-toolbar title="选择去重等级" columns="{{ levelPicker }}" default-index="{{ level }}" bind:cancel="onCancel" bind:confirm="onConfirm" />
+    </van-popup>
+  </view>
+  <!-- 输入框 -->
+  <van-field type="textarea" autosize="{{textarea}}" show-confirm-bar	clearable	value="{{ content }}" placeholder="请输入文本" border="{{ false }}" bind:change="onChange" />
+</view>
+
+<!-- 按钮 -->
+<van-button type="primary" bind:click="deDuplication" custom-style="width: 150rpx; height: 75rpx;" loading="{{loading}}">去重</van-button>
+
+<!-- 输出栏 -->
+<view class="outputPage" bindtap="copy">
+  <text class="result" user-select>{{result}}</text>
+</view>
+
+<!-- 提示框 -->
+<van-dialog id="van-dialog" />
+
+
+
+
+

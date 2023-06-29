@@ -1,0 +1,7 @@
+<view class="container">
+  <van-icon name="setting-o" size="50rpx" bind:click="setting" />
+  <van-icon name="like-o" size="50rpx" />
+  <van-icon name="star-o" size="50rpx" />
+  <van-icon name="fire-o" size="50rpx" />
+  <van-icon name="point-gift-o" size="50rpx" />
+</view>

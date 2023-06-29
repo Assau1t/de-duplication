@@ -1,0 +1,14 @@
+<view class="title">
+  <view>
+    <text>请输入appid和key </text>
+    <van-icon name="question" size="25rpx" color="#00BFFF" bind:click="help" />
+  </view>
+  <van-checkbox value="{{ disabled }}" shape="square" bind:change="disabled">只读</van-checkbox>
+</view>
+
+<van-cell-group class="cell" inset>
+  <van-field label="appid" value="{{ appid }}" placeholder="请输入appid" border="{{ false }}" bind:change="onChange" data-index="appid" size="large" clearable disabled="{{ disabled }}" />
+  <van-field label="key" value="{{ key }}" placeholder="请输入key" border="{{ false }}" bind:change="onChange" data-index="key" size="large" clearable disabled="{{ disabled }}" />
+</van-cell-group>
+
+<van-button class="confirm" type="primary" bind:click="confirm" custom-style="width:120rpx">确认</van-button>
