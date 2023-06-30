@@ -12,7 +12,7 @@ const translate = (from, to, query) => {
   var sign = MD5.MD5(str1);
   return new Promise((resolve, reject) => {
     wx.request({
-      url: "http://api.fanyi.baidu.com/api/trans/vip/translate",
+      url: "https://fanyi-api.baidu.com/api/trans/vip/translate",
       method: "GET",
       data: {
         q: query,
