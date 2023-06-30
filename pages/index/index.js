@@ -19,8 +19,8 @@ Page({
     loading: false,
   },
   onShow() {
-    var appid = wx.getStorageSync("appid");
-    var key = wx.getStorageSync("key");
+    let appid = wx.getStorageSync("appid");
+    let key = wx.getStorageSync("key");
     if (!(appid && key)) {
       Dialog.alert({
         title: "提示",
@@ -71,14 +71,14 @@ Page({
         // 测试是否能正确请求，不能则会返回'error'
         await translate("en", "zh", "a");
         // 判断测试结果错误与否
-        var testResult = wx.getStorageSync("tempResult");
+        let testResult = wx.getStorageSync("tempResult");
         console.log(`testResult:${testResult}`);
         if (testResult !== "error") {
           wx.setStorageSync("tempResult", this.data.content);
-          var principle = this.data.principle;
-          var level = this.data.level;
+          let principle = this.data.principle;
+          let level = this.data.level;
           (async () => {
-            for (var i = 0; i < principle[level].length; i++) {
+            for (let i = 0; i < principle[level].length; i++) {
               if (i < principle[level].length - 1) {
                 await translate(
                   principle[level][i],
@@ -86,7 +86,7 @@ Page({
                   wx.getStorageSync("tempResult")
                 );
               } else {
-                var result = wx.getStorageSync("tempResult");
+                let result = wx.getStorageSync("tempResult");
                 this.setData({
                   result: result,
                   loading: false,
@@ -102,7 +102,7 @@ Page({
           })();
         } else {
           this.setData({ loading: false });
-          var errorCode = wx.getStorageSync("errorCode");
+          let errorCode = wx.getStorageSync("errorCode");
           console.log(errorCode);
           switch (errorCode) {
             case "52001":

@@ -6,13 +6,15 @@ Page({
   },
 
   onShow() {
-    var appid = wx.getStorageSync("appid");
-    var key = wx.getStorageSync("key");
-    this.setData({
-      appid: appid,
-      key: key,
-    });
-    if ((appid || key) == false) {
+    if (!this.data.appid && !this.data.key) {
+      let appid = wx.getStorageSync("appid");
+      let key = wx.getStorageSync("key");
+      this.setData({
+        appid: appid,
+        key: key,
+      });
+    }
+    if (!this.data.appid || !this.data.key) {
       console.log("有一个是空的");
       this.setData({ disabled: false });
     }
@@ -20,8 +22,8 @@ Page({
 
   onChange(event) {
     console.log(event);
-    var index = event.currentTarget.dataset.index;
-    var detail = event.detail;
+    let index = event.currentTarget.dataset.index;
+    let detail = event.detail;
     if (index == "appid") {
       this.setData({ appid: detail });
     } else if (index == "key") {
@@ -42,8 +44,8 @@ Page({
   },
 
   confirm() {
-    var appid = this.data.appid;
-    var key = this.data.key;
+    let appid = this.data.appid;
+    let key = this.data.key;
     if (appid && key) {
       wx.setStorageSync("appid", appid);
       wx.setStorageSync("key", key);
