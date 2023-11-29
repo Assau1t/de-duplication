@@ -91,7 +91,7 @@ Page({
                   result: result,
                   loading: false,
                 });
-                console.log("最后结果是：" + result);
+                console.log(`最后结果是：${result}`);
                 wx.setStorageSync("tempResult", "");
                 wx.showToast({
                   title: "去重完成",

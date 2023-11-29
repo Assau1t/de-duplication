@@ -26,7 +26,7 @@ const translate = (from, to, query) => {
         if (res.data.trans_result) {
           var dst = res.data.trans_result[0].dst;
           wx.setStorageSync("tempResult", dst);
-          console.log(from + "→" + to + "：" + dst);
+          console.log(`${from}→${to}：${dst}`);
           resolve();
         } else {
           // wx.setStorageSync('tempResult', res.data.error_code);
