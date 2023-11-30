@@ -19,6 +19,10 @@ Page({
     loading: false,
   },
   onShow() {
+    wx.showShareMenu({
+      withShareTicket: true,
+      menus: ["shareAppMessage", "shareTimeline"],
+    });
     let appid = wx.getStorageSync("appid");
     let key = wx.getStorageSync("key");
     if (!(appid && key)) {
