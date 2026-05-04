@@ -1,5 +1,15 @@
 Page({
-  data: {},
+  data: {
+    hasCredentials: false,
+  },
+
+  onShow() {
+    const appid = wx.getStorageSync("appid");
+    const key = wx.getStorageSync("key");
+    this.setData({
+      hasCredentials: Boolean(appid && key),
+    });
+  },
 
   setting() {
     wx.navigateTo({
@@ -7,10 +17,9 @@ Page({
     });
   },
 
-  donate() {
-    wx.showToast({
-      icon: "none",
-      title: "暂未开放",
+  help() {
+    wx.navigateTo({
+      url: "/pages/help/help",
     });
   },
 });

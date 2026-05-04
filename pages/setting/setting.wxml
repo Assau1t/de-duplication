@@ -1,14 +1,82 @@
-<view class="title">
-  <view>
-    <text>请输入appid和key </text>
-    <van-icon name="question" size="25rpx" color="#00BFFF" bind:click="help" />
+<view class="page">
+  <view class="hero">
+    <text class="eyebrow">API Settings</text>
+    <text class="title">接口配置</text>
+    <text class="subtitle">密钥仅保存在本机小程序缓存中，用于请求百度翻译通用文本接口。</text>
   </view>
-  <van-checkbox value="{{ disabled }}" shape="square" bind:change="disabled">只读</van-checkbox>
+
+  <view class="status-card {{hasCredentials ? 'ready' : 'missing'}}">
+    <view>
+      <text class="status-title">{{hasCredentials ? '已配置' : '未配置'}}</text>
+      <text class="status-desc">{{hasCredentials ? '经典回译模式可以正常发起请求。' : '请填写 App ID 和密钥后再处理文本。'}}</text>
+    </view>
+    <van-icon name="{{hasCredentials ? 'passed' : 'warning-o'}}" size="40rpx" />
+  </view>
+
+  <view class="panel">
+    <view class="panel-header">
+      <view>
+        <text class="section-label">Credentials</text>
+        <text class="section-title">百度翻译凭据</text>
+      </view>
+      <van-button
+        wx:if="{{!editing}}"
+        type="default"
+        bind:click="edit"
+        custom-style="height: 72rpx; border-color: #D6D3D1; color: #404040;"
+      >
+        编辑
+      </van-button>
+    </view>
+
+    <view class="field-label">App ID</view>
+    <van-field
+      value="{{appid}}"
+      placeholder="请输入 App ID"
+      border="{{ false }}"
+      disabled="{{!editing}}"
+      bind:change="onChange"
+      data-index="appid"
+      custom-style="padding: 0; font-size: 30rpx;"
+    />
+
+    <view class="field-label key-label">密钥</view>
+    <van-field
+      value="{{editing ? key : maskedKey}}"
+      placeholder="请输入密钥"
+      border="{{ false }}"
+      disabled="{{!editing}}"
+      bind:change="onChange"
+      data-index="key"
+      custom-style="padding: 0; font-size: 30rpx;"
+    />
+
+    <view class="action-row">
+      <van-button
+        type="default"
+        bind:click="help"
+        custom-style="width: 100%; height: 88rpx; border-color: #D6D3D1; color: #404040;"
+      >
+        获取说明
+      </van-button>
+      <van-button
+        type="primary"
+        bind:click="confirm"
+        custom-style="width: 100%; height: 88rpx; background: #171717; border-color: #171717; color: #FFFFFF;"
+      >
+        保存配置
+      </van-button>
+    </view>
+
+    <van-button
+      wx:if="{{hasCredentials}}"
+      type="default"
+      bind:click="clearCredentials"
+      custom-style="width: 100%; height: 80rpx; margin-top: 18rpx; border-color: #FCA5A5; color: #991B1B;"
+    >
+      清除配置
+    </van-button>
+  </view>
 </view>
 
-<van-cell-group class="cell" inset>
-  <van-field label="appid" value="{{ appid }}" placeholder="请输入appid" border="{{ false }}" bind:change="onChange" data-index="appid" size="large" clearable disabled="{{ disabled }}" />
-  <van-field label="key" value="{{ key }}" placeholder="请输入key" border="{{ false }}" bind:change="onChange" data-index="key" size="large" clearable disabled="{{ disabled }}" />
-</van-cell-group>
-
-<van-button class="confirm" type="primary" bind:click="confirm" custom-style="width:120rpx">确认</van-button>
+<van-dialog id="van-dialog" />

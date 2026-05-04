@@ -1,181 +1,230 @@
-const app = getApp();
-import Toast from "@vant/weapp/toast/toast";
-import Dialog from "@vant/weapp/dialog/dialog";
-import translate from "../translate";
+const Dialog = require("@vant/weapp/dialog/dialog").default;
+const translate = require("../translate");
+const {
+  rewriteModes,
+  rewriteLevels,
+  getMode,
+  getLevel,
+  getLanguageSteps,
+} = require("../../utils/rewriteStrategies");
+const { getErrorMessage } = require("../../utils/errorMessages");
+const { getTextMetrics, compareTextMetrics } = require("../../utils/textMetrics");
+
+function buildProgressSteps(level) {
+  const languages = getLanguageSteps(level);
+  const steps = [];
+  for (let i = 0; i < languages.length - 1; i += 1) {
+    steps.push({
+      id: `${languages[i]}-${languages[i + 1]}-${i}`,
+      label: `${languages[i]} -> ${languages[i + 1]}`,
+      status: "pending",
+    });
+  }
+  return steps;
+}
 
 Page({
   data: {
-    showLevelSelection: false,
-    levelPicker: ["轻度去重", "中度去重", "重度去重"],
+    rewriteModes,
+    rewriteLevels,
+    selectedMode: "classic",
+    selectedModeInfo: getMode("classic"),
     level: 0,
+    selectedLevel: getLevel(0),
     content: "",
-    textarea: { maxHeight: 140, minHeight: 50 },
+    textarea: { maxHeight: 220, minHeight: 120 },
     result: "",
-    principle: [
-      ["zh", "en", "de", "zh"],
-      ["zh", "en", "de", "jp", "pt", "zh"],
-      ["zh", "en", "de", "jp", "pt", "it", "pl", "bul", "est", "zh"],
-    ],
     loading: false,
+    hasCredentials: false,
+    statusText: "准备处理",
+    lastStatus: "idle",
+    inputMetrics: getTextMetrics(""),
+    resultMetrics: compareTextMetrics("", ""),
+    progressSteps: buildProgressSteps(0),
   },
+
   onShow() {
     wx.showShareMenu({
       withShareTicket: true,
       menus: ["shareAppMessage", "shareTimeline"],
     });
-    let appid = wx.getStorageSync("appid");
-    let key = wx.getStorageSync("key");
-    if (!(appid && key)) {
-      Dialog.alert({
-        title: "提示",
-        message:
-          "（第一次使用或缓存被清除）\n您的百度翻译appid或key不完整，请设置以正常使用。",
-        confirmButtonText: "去设置",
-      }).then(() => {
-        wx.navigateTo({
-          url: "/pages/setting/setting",
-        });
-      });
-    }
+    this.refreshCredentialStatus();
   },
 
-  showLevelSelection() {
-    this.setData({ showLevelSelection: true });
+  refreshCredentialStatus() {
+    const appid = wx.getStorageSync("appid");
+    const key = wx.getStorageSync("key");
+    this.setData({
+      hasCredentials: Boolean(appid && key),
+    });
   },
 
-  closeLevelSelection() {
-    this.setData({ showLevelSelection: false });
+  selectMode(event) {
+    const modeId = event.currentTarget.dataset.mode;
+    const mode = getMode(modeId);
+    this.setData({
+      selectedMode: mode.id,
+      selectedModeInfo: mode,
+      lastStatus: mode.available ? "idle" : "disabled",
+      statusText: mode.available ? "准备处理" : "智能改写暂未接入",
+    });
   },
 
-  onConfirm(event) {
-    const { picker, value, index } = event.detail;
-    Toast(`当前值：${value}, 当前索引：${index}`);
-    this.setData({ level: event.detail.index });
-    this.setData({ showLevelSelection: false });
-  },
-
-  onCancel() {
-    Toast("取消");
-    this.setData({ showLevelSelection: false });
+  selectLevel(event) {
+    const level = Number(event.currentTarget.dataset.index);
+    this.setData({
+      level,
+      selectedLevel: getLevel(level),
+      progressSteps: buildProgressSteps(level),
+    });
   },
 
   onChange(event) {
-    // event.detail 为当前输入的值
-    console.log(event.detail);
+    const content = event.detail;
     this.setData({
-      content: event.detail,
+      content,
+      inputMetrics: getTextMetrics(content),
     });
   },
 
   async deDuplication() {
-    // 判断输入框是否为空
-    if (this.data.content !== "") {
-      try {
-        this.setData({ loading: true });
-        // 测试是否能正确请求，不能则会返回'error'
-        await translate("en", "zh", "a");
-        // 判断测试结果错误与否
-        let testResult = wx.getStorageSync("tempResult");
-        console.log(`testResult:${testResult}`);
-        if (testResult !== "error") {
-          wx.setStorageSync("tempResult", this.data.content);
-          let principle = this.data.principle;
-          let level = this.data.level;
-          for (let i = 0; i < principle[level].length; i++) {
-            if (i < principle[level].length - 1) {
-              await translate(
-                principle[level][i],
-                principle[level][i + 1],
-                wx.getStorageSync("tempResult")
-              );
-            } else {
-              let result = wx.getStorageSync("tempResult");
-              this.setData({
-                result: result,
-              });
-              console.log(`最后结果是：${result}`);
-              wx.setStorageSync("tempResult", "");
-              wx.showToast({
-                title: "去重完成",
-                icon: "success",
-              });
-            }
-          }
-        } else {
-          let errorCode = wx.getStorageSync("errorCode");
-          console.log(errorCode);
-          switch (errorCode) {
-            case "52001":
-              Dialog.alert({
-                title: "提示",
-                message: "请求超时，请重试。",
-              }).then(() => {});
-              break;
-            case "52002":
-              Dialog.alert({
-                title: "提示",
-                message: "百度翻译系统错误，请重试。",
-              }).then(() => {});
-              break;
-            case "52003":
-              Dialog.alert({
-                title: "提示",
-                message:
-                  "您设置的百度翻译appid或key不正确，无法启用翻译接口，请检查。",
-                confirmButtonText: "去修改",
-              }).then(() => {
-                wx.navigateTo({
-                  url: "/pages/setting/setting",
-                });
-              });
-              break;
-            case "54003":
-              Dialog.alert({
-                title: "提示",
-                message:
-                  "百度翻译接口提示您的调用频率过高，需进行身份认证后切换为高级版/尊享版",
-              }).then(() => {});
-              break;
-            case "54005":
-              Dialog.alert({
-                title: "提示",
-                message: "百度翻译接口提示请降低长文本的发送频率，3s后再试",
-              }).then(() => {});
-              break;
-            case "network":
-              Dialog.alert({
-                title: "提示",
-                message: "网络请求失败，请检查网络后重试。",
-              }).then(() => {});
-              break;
-          }
-        }
-      } catch (error) {
-        console.log(error);
-        Dialog.alert({
-          title: "提示",
-          message: "网络请求失败，请检查网络后重试。",
-        }).then(() => {});
-      } finally {
-        this.setData({ loading: false });
-      }
-    } else {
+    const content = this.data.content.trim();
+    if (!content) {
       wx.showToast({
         title: "请输入文本",
         icon: "error",
       });
+      return;
     }
+
+    if (!this.data.hasCredentials) {
+      this.showError("missingCredentials");
+      return;
+    }
+
+    if (!getMode(this.data.selectedMode).available) {
+      Dialog.alert({
+        title: "智能改写预留",
+        message: "当前版本先完成前端架构位，不在小程序端接入或暴露大模型 API 密钥。",
+      });
+      return;
+    }
+
+    await this.runClassicRewrite(content);
+  },
+
+  async runClassicRewrite(content) {
+    let currentText = content;
+    const languages = getLanguageSteps(this.data.level);
+    const progressSteps = buildProgressSteps(this.data.level);
+
+    this.setData({
+      loading: true,
+      result: "",
+      progressSteps,
+      lastStatus: "running",
+      statusText: "正在多语言回译",
+      resultMetrics: compareTextMetrics(content, ""),
+    });
+
+    for (let i = 0; i < languages.length - 1; i += 1) {
+      this.updateProgressStep(i, "running");
+      const response = await translate(languages[i], languages[i + 1], currentText);
+
+      if (!response.ok) {
+        this.updateProgressStep(i, "error");
+        this.setData({
+          loading: false,
+          lastStatus: "error",
+          statusText: "处理失败",
+        });
+        this.showError(response.errorCode);
+        return;
+      }
+
+      currentText = response.text;
+      this.updateProgressStep(i, "done");
+    }
+
+    this.setData({
+      result: currentText,
+      loading: false,
+      lastStatus: "done",
+      statusText: "处理完成",
+      resultMetrics: compareTextMetrics(content, currentText),
+    });
+    wx.showToast({
+      title: "去重完成",
+      icon: "success",
+    });
+  },
+
+  updateProgressStep(index, status) {
+    const progressSteps = this.data.progressSteps.map((step, stepIndex) => {
+      if (stepIndex !== index) {
+        return step;
+      }
+      return Object.assign({}, step, { status });
+    });
+    this.setData({ progressSteps });
+  },
+
+  showError(errorCode) {
+    const error = getErrorMessage(errorCode);
+    Dialog.alert({
+      title: error.title,
+      message: error.message,
+      confirmButtonText: error.action === "settings" ? "去设置" : "知道了",
+    }).then(() => {
+      if (error.action === "settings") {
+        wx.navigateTo({
+          url: "/pages/setting/setting",
+        });
+      }
+    });
   },
 
   copy() {
+    if (!this.data.result) {
+      wx.showToast({
+        title: "暂无结果",
+        icon: "none",
+      });
+      return;
+    }
+
     wx.setClipboardData({
       data: this.data.result,
-      success(res) {
+      success() {
         wx.showToast({
-          title: "已复制到剪贴板",
+          title: "已复制",
           duration: 1500,
         });
       },
+    });
+  },
+
+  clearAll() {
+    this.setData({
+      content: "",
+      result: "",
+      inputMetrics: getTextMetrics(""),
+      resultMetrics: compareTextMetrics("", ""),
+      progressSteps: buildProgressSteps(this.data.level),
+      lastStatus: "idle",
+      statusText: "准备处理",
+    });
+  },
+
+  retry() {
+    if (!this.data.loading) {
+      this.deDuplication();
+    }
+  },
+
+  goSetting() {
+    wx.navigateTo({
+      url: "/pages/setting/setting",
     });
   },
 });

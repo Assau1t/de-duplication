@@ -1,40 +1,76 @@
-body {
-  display: block;
-  margin: 8px;
+page {
+  background: #f7f6f3;
+  color: #171717;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-.container {
-  color: #333333;
-  font-size: 14px;
-  padding: 12px;
+.page {
+  min-height: 100vh;
+  padding: 76rpx 28rpx 48rpx;
+  box-sizing: border-box;
 }
 
-p {
-  display: block;
-  margin-block-start: 1em;
-  margin-block-end: 1em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  padding: 0 20px;
-  font-size: 12px;
+.hero {
+  padding: 20rpx 4rpx 18rpx;
 }
 
-h2 {
+.eyebrow,
+.section-label {
   display: block;
-  font-size: 1.5em;
-  margin-block-start: 0.83em;
-  margin-block-end: 0.83em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  font-weight: bold;
+  color: #8a8178;
+  font-size: 22rpx;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: uppercase;
 }
 
-ul {
+.title {
   display: block;
-  list-style-type: disc;
-  margin-block-start: 1em;
-  margin-block-end: 1em;
-  margin-inline-start: 0px;
-  margin-inline-end: 0px;
-  padding: 0 20px;
+  margin-top: 12rpx;
+  color: #171717;
+  font-size: 50rpx;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.subtitle,
+.body,
+.notice-body {
+  display: block;
+  color: #404040;
+  font-size: 28rpx;
+  line-height: 1.7;
+}
+
+.subtitle {
+  margin-top: 18rpx;
+}
+
+.panel,
+.notice {
+  margin-top: 24rpx;
+  padding: 28rpx;
+  border: 2rpx solid #e7e5e4;
+  border-radius: 16rpx;
+  background: #ffffff;
+  box-sizing: border-box;
+}
+
+.section-title,
+.notice-title {
+  display: block;
+  margin-top: 8rpx;
+  margin-bottom: 18rpx;
+  color: #171717;
+  font-size: 34rpx;
+  font-weight: 700;
+}
+
+.notice {
+  border-color: #e7c873;
+  background: #fffaf0;
+}
+
+.notice-title {
+  margin-top: 0;
 }

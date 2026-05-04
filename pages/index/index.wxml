@@ -1,29 +1,162 @@
-<view class="page-bg"></view>
-
-<view class="inputPage">
-  <!-- 选择去重等级 -->
-  <view class="menu">
-    <van-cell title="去重等级" is-link value="{{levelPicker[level]}}" bind:click="showLevelSelection"/>
-    <van-popup show="{{ showLevelSelection }}" position="bottom" custom-style="height: 30%;" round bind:close="closeLevelSelection">
-      <van-picker show-toolbar title="选择去重等级" columns="{{ levelPicker }}" default-index="{{ level }}" bind:cancel="onCancel" bind:confirm="onConfirm" />
-    </van-popup>
+<view class="page">
+  <view class="hero">
+    <view>
+      <text class="eyebrow">Academic Rewrite Workspace</text>
+      <text class="title">论文去重工作台</text>
+      <text class="subtitle">通过多语言回译重组表达，保留原意并提升文本差异度。</text>
+    </view>
+    <view class="credential {{hasCredentials ? 'credential-ready' : 'credential-missing'}}" bindtap="goSetting">
+      <van-icon name="{{hasCredentials ? 'passed' : 'warning-o'}}" size="30rpx" />
+      <text>{{hasCredentials ? '接口已配置' : '需要配置接口'}}</text>
+    </view>
   </view>
-  <!-- 输入框 -->
-  <van-field type="textarea" autosize="{{textarea}}" show-confirm-bar	clearable	value="{{ content }}" placeholder="请输入文本" border="{{ false }}" bind:change="onChange" />
+
+  <view class="panel">
+    <view class="panel-header">
+      <view>
+        <text class="section-label">Rewrite Mode</text>
+        <text class="section-title">改写模式</text>
+      </view>
+      <text class="status-pill {{lastStatus}}">{{statusText}}</text>
+    </view>
+
+    <view class="mode-grid">
+      <view
+        wx:for="{{rewriteModes}}"
+        wx:key="id"
+        class="mode-card {{selectedMode === item.id ? 'is-active' : ''}} {{!item.available ? 'is-disabled' : ''}}"
+        data-mode="{{item.id}}"
+        bindtap="selectMode"
+      >
+        <view class="mode-topline">
+          <text class="mode-name">{{item.name}}</text>
+          <text class="mode-badge">{{item.badge}}</text>
+        </view>
+        <text class="mode-desc">{{item.description}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-header">
+      <view>
+        <text class="section-label">Input</text>
+        <text class="section-title">原文输入</text>
+      </view>
+      <text class="metric-text">{{inputMetrics.characters}} 字</text>
+    </view>
+
+    <view class="field-label">待处理文本</view>
+    <van-field
+      type="textarea"
+      autosize="{{textarea}}"
+      clearable
+      value="{{content}}"
+      placeholder="粘贴论文段落或摘要文本"
+      border="{{ false }}"
+      bind:change="onChange"
+      custom-style="padding: 0; font-size: 30rpx; line-height: 1.7;"
+    />
+  </view>
+
+  <view class="panel">
+    <view class="panel-header">
+      <view>
+        <text class="section-label">Intensity</text>
+        <text class="section-title">去重等级</text>
+      </view>
+      <text class="metric-text">{{selectedLevel.summary}}</text>
+    </view>
+
+    <view class="level-list">
+      <view
+        wx:for="{{rewriteLevels}}"
+        wx:key="id"
+        class="level-item {{level === index ? 'is-active' : ''}}"
+        data-index="{{index}}"
+        bindtap="selectLevel"
+      >
+        <view>
+          <text class="level-name">{{item.name}}</text>
+          <text class="level-summary">{{item.summary}}</text>
+        </view>
+        <van-icon wx:if="{{level === index}}" name="success" size="30rpx" color="#171717" />
+      </view>
+    </view>
+
+    <view class="action-row">
+      <van-button
+        type="default"
+        bind:click="clearAll"
+        custom-style="width: 100%; height: 88rpx; border-color: #D6D3D1; color: #404040; background: #FFFFFF;"
+      >
+        清空
+      </van-button>
+      <van-button
+        type="primary"
+        loading="{{loading}}"
+        bind:click="deDuplication"
+        custom-style="width: 100%; height: 88rpx; background: #171717; border-color: #171717; color: #FFFFFF;"
+      >
+        开始去重
+      </van-button>
+    </view>
+  </view>
+
+  <view class="panel">
+    <view class="panel-header">
+      <view>
+        <text class="section-label">Progress</text>
+        <text class="section-title">处理进度</text>
+      </view>
+      <text class="metric-text">{{progressSteps.length}} 步</text>
+    </view>
+
+    <view class="progress-list">
+      <view wx:for="{{progressSteps}}" wx:key="id" class="progress-item {{item.status}}">
+        <view class="progress-dot"></view>
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="panel result-panel">
+    <view class="panel-header">
+      <view>
+        <text class="section-label">Result</text>
+        <text class="section-title">结果对比</text>
+      </view>
+      <text class="metric-text">变化 {{resultMetrics.deltaLabel}} 字</text>
+    </view>
+
+    <view class="compare">
+      <view class="compare-block">
+        <text class="compare-title">原文</text>
+        <text class="compare-content">{{content || '输入文本后，这里会保留原文用于对比。'}}</text>
+      </view>
+      <view class="compare-block result">
+        <text class="compare-title">改写结果</text>
+        <text class="compare-content" user-select>{{result || '完成处理后，这里会展示改写后的文本。'}}</text>
+      </view>
+    </view>
+
+    <view class="result-actions">
+      <van-button
+        type="default"
+        bind:click="retry"
+        custom-style="width: 100%; height: 80rpx; border-color: #D6D3D1; color: #404040;"
+      >
+        重新处理
+      </van-button>
+      <van-button
+        type="primary"
+        bind:click="copy"
+        custom-style="width: 100%; height: 80rpx; background: #D4AF37; border-color: #D4AF37; color: #171717;"
+      >
+        复制结果
+      </van-button>
+    </view>
+  </view>
 </view>
 
-<!-- 按钮 -->
-<van-button type="primary" bind:click="deDuplication" custom-style="width: 150rpx; height: 75rpx;" loading="{{loading}}">去重</van-button>
-
-<!-- 输出栏 -->
-<view class="outputPage" bindtap="copy">
-  <text class="result" user-select>{{result}}</text>
-</view>
-
-<!-- 提示框 -->
 <van-dialog id="van-dialog" />
-
-
-
-
-

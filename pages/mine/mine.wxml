@@ -1,10 +1,39 @@
-<view class="container">
-  <view class="content" bindtap="setting">
-    <van-icon name="setting-o" size="50rpx" />
-    <text>设置</text>
+<view class="page">
+  <view class="hero">
+    <text class="eyebrow">Profile</text>
+    <text class="title">项目控制台</text>
+    <text class="subtitle">管理接口配置，查看使用说明，保持工具轻量可控。</text>
   </view>
-  <view class="content" bindtap="donate">
-    <van-icon name="thumb-circle-o" size="50rpx" />
-    <text>捐赠</text>
+
+  <view class="summary-card">
+    <view>
+      <text class="summary-title">经典回译</text>
+      <text class="summary-desc">{{hasCredentials ? '接口已配置，可以从首页开始处理文本。' : '请先完成百度翻译接口配置。'}}</text>
+    </view>
+    <view class="summary-state {{hasCredentials ? 'ready' : 'missing'}}">{{hasCredentials ? '可用' : '待配置'}}</view>
+  </view>
+
+  <view class="action-list">
+    <view class="action-item" bindtap="setting">
+      <view class="action-icon">
+        <van-icon name="setting-o" size="38rpx" />
+      </view>
+      <view class="action-copy">
+        <text class="action-title">接口配置</text>
+        <text class="action-desc">管理 App ID 和密钥</text>
+      </view>
+      <van-icon name="arrow" size="28rpx" color="#A8A29E" />
+    </view>
+
+    <view class="action-item" bindtap="help">
+      <view class="action-icon">
+        <van-icon name="description" size="38rpx" />
+      </view>
+      <view class="action-copy">
+        <text class="action-title">使用说明</text>
+        <text class="action-desc">了解配置流程和隐私边界</text>
+      </view>
+      <van-icon name="arrow" size="28rpx" color="#A8A29E" />
+    </view>
   </view>
 </view>

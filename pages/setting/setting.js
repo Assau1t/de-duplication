@@ -1,34 +1,56 @@
+const Dialog = require("@vant/weapp/dialog/dialog").default;
+
+function maskKey(key) {
+  if (!key) {
+    return "";
+  }
+  if (key.length <= 8) {
+    return "********";
+  }
+  return `${key.slice(0, 4)}********${key.slice(-4)}`;
+}
+
 Page({
   data: {
     appid: "",
     key: "",
-    disabled: true,
+    editing: false,
+    hasCredentials: false,
+    maskedKey: "",
   },
 
   onShow() {
-    if (!this.data.appid && !this.data.key) {
-      let appid = wx.getStorageSync("appid");
-      let key = wx.getStorageSync("key");
-      this.setData({
-        appid: appid,
-        key: key,
-      });
-    }
-    if (!this.data.appid || !this.data.key) {
-      console.log("有一个是空的");
-      this.setData({ disabled: false });
-    }
+    this.loadCredentials();
+  },
+
+  loadCredentials() {
+    const appid = wx.getStorageSync("appid") || "";
+    const key = wx.getStorageSync("key") || "";
+    this.setData({
+      appid,
+      key,
+      maskedKey: maskKey(key),
+      hasCredentials: Boolean(appid && key),
+      editing: !(appid && key),
+    });
   },
 
   onChange(event) {
-    console.log(event);
-    let index = event.currentTarget.dataset.index;
-    let detail = event.detail;
-    if (index == "appid") {
-      this.setData({ appid: detail });
-    } else if (index == "key") {
-      this.setData({ key: detail });
+    const index = event.currentTarget.dataset.index;
+    const value = event.detail;
+    if (index === "appid") {
+      this.setData({ appid: value });
     }
+    if (index === "key") {
+      this.setData({
+        key: value,
+        maskedKey: maskKey(value),
+      });
+    }
+  },
+
+  edit() {
+    this.setData({ editing: true });
   },
 
   help() {
@@ -37,30 +59,51 @@ Page({
     });
   },
 
-  disabled(event) {
-    this.setData({
-      disabled: event.detail,
-    });
-  },
-
   confirm() {
-    let appid = this.data.appid;
-    let key = this.data.key;
-    if (appid && key) {
-      wx.setStorageSync("appid", appid);
-      wx.setStorageSync("key", key);
-      wx.showToast({
-        title: "修改成功",
-        icon: "success",
-      });
-      setTimeout(() => {
-        wx.navigateBack();
-      }, 800);
-    } else {
+    const appid = this.data.appid.trim();
+    const key = this.data.key.trim();
+
+    if (!appid || !key) {
       wx.showToast({
         title: "请填写完整",
         icon: "error",
       });
+      return;
     }
+
+    wx.setStorageSync("appid", appid);
+    wx.setStorageSync("key", key);
+    this.setData({
+      appid,
+      key,
+      maskedKey: maskKey(key),
+      hasCredentials: true,
+      editing: false,
+    });
+    wx.showToast({
+      title: "已保存",
+      icon: "success",
+    });
+  },
+
+  clearCredentials() {
+    Dialog.confirm({
+      title: "清除接口配置",
+      message: "清除后需要重新填写 App ID 和密钥才能使用经典回译。",
+    }).then(() => {
+      wx.removeStorageSync("appid");
+      wx.removeStorageSync("key");
+      this.setData({
+        appid: "",
+        key: "",
+        maskedKey: "",
+        hasCredentials: false,
+        editing: true,
+      });
+      wx.showToast({
+        title: "已清除",
+        icon: "success",
+      });
+    }).catch(() => {});
   },
 });

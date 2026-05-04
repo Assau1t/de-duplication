@@ -1,27 +1,38 @@
-<div class="container">
-  <p>
-    本指引是本小程序开发者“Assau1t”(以下简称“开发者”)为处理你的个人信息而制定。
-  </p>
-  <ul style="font-weight: bold;">
-    <li>
-      以下是百度翻译appid和key的获取方法。注意，2022年8月1日起，百度通用翻译API标准版免费调用量调整为5万字符/月，高级版免费调用量调整为100万字符/月。
-    </li>
-  </ul>
-  <h2>①省流版</h2>
-  <ul>
-    <li>
-      访问"api.fanyi.baidu.com"，注册成为百度翻译开发者并登录，完成认证申请(选择免费的标准版即可)，开通服务后(选择通用文本翻译服务)，进入开发者信息页，便能看到申请信息中的APP ID和密钥。
-    </li>
-  </ul>
-  <h2>②WIFI版</h2>
-  <ul>
-    <li>
-      非常抱歉，我们正在努力完善页面内容，请稍后再来查看。
-    </li>
-  </ul>
-  <ul>
-    <li>邮箱：702061287@qq.com</li>
-  </ul>
-  <p>更新日期：2023年5月8日</p>
-  <p>生效日期：2023年5月8日</p>
-</div>
+<view class="page">
+  <view class="hero">
+    <text class="eyebrow">Guide</text>
+    <text class="title">使用说明</text>
+    <text class="subtitle">这个小程序通过百度翻译接口完成多语言回译，适合对论文段落进行轻量表达重组。</text>
+  </view>
+
+  <view class="panel">
+    <text class="section-label">Step 01</text>
+    <text class="section-title">获取接口凭据</text>
+    <text class="body">
+      访问 api.fanyi.baidu.com，注册并开通通用文本翻译服务。进入开发者信息页后，复制 App ID 和密钥。
+    </text>
+  </view>
+
+  <view class="panel">
+    <text class="section-label">Step 02</text>
+    <text class="section-title">配置小程序</text>
+    <text class="body">
+      在“我的 - 接口配置”中填写 App ID 和密钥。凭据只保存在本机小程序缓存中，清除缓存或点击清除配置后需要重新填写。
+    </text>
+  </view>
+
+  <view class="panel">
+    <text class="section-label">Step 03</text>
+    <text class="section-title">开始回译</text>
+    <text class="body">
+      在首页粘贴待处理文本，选择经典回译模式和去重等级。等级越高，语言链路越长，表达变化通常越明显。
+    </text>
+  </view>
+
+  <view class="notice">
+    <text class="notice-title">隐私边界</text>
+    <text class="notice-body">
+      小程序不会上传或保存你的 App ID、密钥和处理结果到自有服务器。文本会发送至百度翻译接口以完成回译，请避免输入敏感内容。
+    </text>
+  </view>
+</view>
