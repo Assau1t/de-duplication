@@ -67,10 +67,10 @@ Page({
     });
   },
 
-  deDuplication() {
+  async deDuplication() {
     // 判断输入框是否为空
     if (this.data.content !== "") {
-      (async () => {
+      try {
         this.setData({ loading: true });
         // 测试是否能正确请求，不能则会返回'error'
         await translate("en", "zh", "a");
@@ -81,31 +81,27 @@ Page({
           wx.setStorageSync("tempResult", this.data.content);
           let principle = this.data.principle;
           let level = this.data.level;
-          (async () => {
-            for (let i = 0; i < principle[level].length; i++) {
-              if (i < principle[level].length - 1) {
-                await translate(
-                  principle[level][i],
-                  principle[level][i + 1],
-                  wx.getStorageSync("tempResult")
-                );
-              } else {
-                let result = wx.getStorageSync("tempResult");
-                this.setData({
-                  result: result,
-                  loading: false,
-                });
-                console.log(`最后结果是：${result}`);
-                wx.setStorageSync("tempResult", "");
-                wx.showToast({
-                  title: "去重完成",
-                  icon: "success",
-                });
-              }
+          for (let i = 0; i < principle[level].length; i++) {
+            if (i < principle[level].length - 1) {
+              await translate(
+                principle[level][i],
+                principle[level][i + 1],
+                wx.getStorageSync("tempResult")
+              );
+            } else {
+              let result = wx.getStorageSync("tempResult");
+              this.setData({
+                result: result,
+              });
+              console.log(`最后结果是：${result}`);
+              wx.setStorageSync("tempResult", "");
+              wx.showToast({
+                title: "去重完成",
+                icon: "success",
+              });
             }
-          })();
+          }
         } else {
-          this.setData({ loading: false });
           let errorCode = wx.getStorageSync("errorCode");
           console.log(errorCode);
           switch (errorCode) {
@@ -146,9 +142,23 @@ Page({
                 message: "百度翻译接口提示请降低长文本的发送频率，3s后再试",
               }).then(() => {});
               break;
+            case "network":
+              Dialog.alert({
+                title: "提示",
+                message: "网络请求失败，请检查网络后重试。",
+              }).then(() => {});
+              break;
           }
         }
-      })();
+      } catch (error) {
+        console.log(error);
+        Dialog.alert({
+          title: "提示",
+          message: "网络请求失败，请检查网络后重试。",
+        }).then(() => {});
+      } finally {
+        this.setData({ loading: false });
+      }
     } else {
       wx.showToast({
         title: "请输入文本",

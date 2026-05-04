@@ -37,6 +37,9 @@ const translate = (from, to, query) => {
       },
       fail(res) {
         console.log(res);
+        wx.setStorageSync("tempResult", "error");
+        wx.setStorageSync("errorCode", "network");
+        reject(res);
       },
     });
   });
